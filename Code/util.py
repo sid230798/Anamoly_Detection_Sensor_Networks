@@ -35,7 +35,22 @@ def get_standardized_X(X):
 def get_gradient_form_data(X,Y):
 	X_tmp = X[1:] - X[:-1] 
 	return X_tmp,Y[1:]
-	
+
+def visualize(X, Y):
+
+	plt.style.use('ggplot')
+	plt.figure(figsize=(15,5))
+	plt.xlabel('time')
+	plt.ylabel('ECG\'s value')
+	plt.plot(np.arange(len(X)), X, color='b')
+	plt.ylim(-3, 3)
+	x = np.where(Y == 1)[0]
+	print(x)
+	y1 = [-3]*len(x)
+	y2 = [3]*len(x)
+	plt.fill_between(x, y1, y2, facecolor='g', alpha=.3)
+	plt.show()
+
 def visualize_with_readings(temp,humidity,label,readings = None):
 	try:
 		if readings==None:
@@ -43,9 +58,11 @@ def visualize_with_readings(temp,humidity,label,readings = None):
 	except:
 		pass
 	print(len(readings),len(temp),len(humidity),len(label))
-	positive_humidity = humidity*(1-label)
 	positive_readings = readings*(1-label)
+	negative_humidity = readings*label
+
 	negative_humidity = humidity*label
+	positive_humidity = humidity*(1-label)
 	positive_temp = temp*(1-label)
 	negative_temp = temp*label
 	plt.plot(readings, positive_humidity, label = "Valid data") 
