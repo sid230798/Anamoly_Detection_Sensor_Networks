@@ -31,6 +31,14 @@ def get_normalized_X(X):
 def get_standardized_X(X):
 	return (X - np.mean(X, axis=0))/np.std(X, axis=0)
 
+# create data of the "look_back" length from time-series, "ts"
+# and the next "pred_length" values as labels
+def create_subseq(ts, look_back, pred_length):
+    sub_seq, next_values = [], []
+    for i in range(len(ts)-look_back-pred_length):  
+        sub_seq.append(ts[i:i+look_back])
+        next_values.append(ts[i+look_back:i+look_back+pred_length])
+    return np.array(sub_seq), np.array(next_values)
 
 def get_gradient_form_data(X,Y):
 	X_tmp = X[1:] - X[:-1] 
@@ -45,10 +53,32 @@ def visualize(X, Y):
 	plt.plot(np.arange(len(X)), X, color='b')
 	plt.ylim(-3, 3)
 	x = np.where(Y == 1)[0]
-	print(x)
 	y1 = [-3]*len(x)
 	y2 = [3]*len(x)
 	plt.fill_between(x, y1, y2, facecolor='g', alpha=.3)
+	plt.show()
+
+def visualize_duel(X1, X2, Y):
+	fig, axes = plt.subplots(nrows=2, figsize=(15,10))
+
+	axes[0].plot(X1,color='b',label='original data')
+	axes[0].set_xlabel('time')
+	axes[0].set_ylabel('Humidites\'s value')
+	axes[0].set_ylim(-3, 3)
+	x = np.where(Y == 1)[0]
+	y1 = [-3]*len(x)
+	y2 = [3]*len(x)
+	axes[0].fill_between(x, y1, y2, facecolor='g', alpha=.3)
+
+	axes[1].plot(X2, color='r',label='Mahalanobis Distance')
+	axes[1].set_xlabel('time')
+	axes[1].set_ylabel('Mahalanobis Distance')
+	axes[1].set_ylim(0, 1000)
+	y1 = [0]*len(x)
+	y2 = [1000]*len(x)
+	axes[1].fill_between(x, y1, y2, facecolor='g', alpha=.3)
+
+	plt.legend(fontsize=15)
 	plt.show()
 
 def visualize_with_readings(temp,humidity,label,readings = None):
@@ -84,6 +114,19 @@ def visualize_graph(input_data):
 	label    =  input_data[:,[4]].T[0]
 	visualize_with_readings(temp,humidity,label,readings)
 
+def plot_graph(X, Y1, Y2):
+	plt.clf()
+	plt.plot(X, Y1, label = "Train Loss")
+	plt.plot(X, Y2, label = "Test Loss")
+
+	plt.xlabel('Epochs')
+	plt.ylabel('Loss')
+
+	plt.ylim(0.0001, 0.01)
+	plt.title("Oudoor Training")
+	plt.legend()
+	plt.show()   
+
 def get_error(model,X,Y):
 	predicted_Y = model.predict(X)
 	error = Y-predicted_Y
@@ -91,3 +134,19 @@ def get_error(model,X,Y):
 	total_err = np.sum(np.abs((error)))
 	percentage = float(total_err)/len(Y)
 	return total_err,percentage
+
+if __name__ == '__main__' :
+
+	file_path = "lossoutdoor.txt"
+	f = open(file_path, 'r')
+
+	X = []
+	X1 = []
+	X2 = []
+	for line in f:
+		line = line.split()
+		X.append(int(line[0]))
+		X1.append(float(line[1]))
+		X2.append(float(line[2]))
+
+	plot_graph(X, X1, X2)
